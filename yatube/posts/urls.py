@@ -1,9 +1,11 @@
-# posts/urls.py
+from posts import views
 from django.urls import path
 
-from . import views
+
+# Создаём приложение Posts
+app_name = 'Posts'
 
 urlpatterns = [
-    path('', views.index),
-    path('group/<slug:slug>/', views.group_posts),
+    path('', views.index, name='main_page'),
+    path('group_list.html', views.group_posts, name='group_list'),
 ]
