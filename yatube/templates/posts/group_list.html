@@ -1,15 +1,19 @@
 {% extends 'base.html' %}
-<body>
+
 {% include 'includes/header.html' %}
+
+{% block title %}
+  {{ title }}
+{% endblock %}
+
 {% block content %}
-<main>
-  <!-- класс py-5 создает отступы сверху и снизу блока -->
-  <div class="container py-5">
-    <h1>{{ text }}</h1>
-    <p>
-      Группа тайных поклонников графа.
-    </p>
-    {% for post in posts %}
+
+  <h1>{{ group.title }}</h1>
+  <p>
+    {{ group.description }}
+  </p>
+
+  {% for post in page_obj %}
     <ul>
       <li>
         Автор: {{ post.author.get_full_name }}
@@ -20,11 +24,10 @@
     </ul>
     <p>{{ post.text }}</p>
     {% if not forloop.last %}
-    <hr>
-    {% endif %}
-    {% endfor %}
-  </div>
-</main>
+      <hr>{% endif %}
+  {% endfor %}
+
+  {% include 'includes/paginator.html' %}
+
 {% endblock %}
 {% include 'includes/footer.html' %}
-</body>

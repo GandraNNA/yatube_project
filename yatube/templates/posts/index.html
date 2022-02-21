@@ -1,31 +1,47 @@
 {% extends 'base.html' %}
-<body>
+
 {% include 'includes/header.html' %}
+
 {% block content %}
-<main>
-  <!-- класс py-5 создает отступы сверху и снизу блока -->
-  <div class="container py-5">
-    <h1>{{ text }}</h1>
-    {% for post in posts %}
+
+  <h1>{{ text }}</h1>
+
+  {% for post in page_obj %}
+
     <ul>
       <li>
         Автор: {{ post.author.get_full_name }}
+        <a
+            href="{% url 'Posts:profile' post.author.username %}">
+          все посты пользователя
+        </a>
       </li>
       <li>
         Дата публикации: {{ post.pub_date|date:"d E Y" }}
       </li>
     </ul>
+
     <p>{{ post.text }}</p>
+
     <a class="navbar-brand"
-       href="{% url 'Posts:group_list' post.group.slug %}">
-      всё записи группы
+       href="{% url 'Posts:post_detail' post.pk %}">
+      подробная информация
     </a>
-    {% if not forloop.last %}
-    <hr>
+
+    {% if post.group %}
+      <a class="navbar-brand"
+         href="{% url 'Posts:group_list' post.group.slug %}">
+        всё записи группы
+      </a>
     {% endif %}
-    {% endfor %}
-  </div>
-</main>
+
+    {% if not forloop.last %}
+      <hr>{% endif %}
+
+  {% endfor %}
+
+  {% include 'includes/paginator.html' %}
+
 {% endblock %}
+
 {% include 'includes/footer.html' %}
-</body>
