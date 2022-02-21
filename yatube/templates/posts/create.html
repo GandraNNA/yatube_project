@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% include 'includes/header.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 p-5">
+        <div class="card">
+
+          <div class="card-header">
+            {{ header }}
+          </div>
+
+          <div class="card-body">
+            {% if is_edit %}
+              <form method="post">
+            {% else %}
+              <form method="post" action="{% url 'posts:post_create' %}">
+            {% endif %}
+            {% csrf_token %}
+
+            {{ form.as_p }}
+            <small id="id_group-help" class="form-text text-muted">
+              Группа, к которой будет относиться пост
+            </small>
+
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                {% if is_edit %}
+                  Сохранить
+                {% else %}
+                  Добавить
+                {% endif %}
+              </button>
+            </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% include 'includes/footer.html' %}

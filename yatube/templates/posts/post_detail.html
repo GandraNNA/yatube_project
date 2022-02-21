@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% include 'includes/header.html' %}
+
+{% block content %}
+
+  <div class="row">
+    <aside class="col-12 col-md-3">
+      <ul class="list-group list-group-flush">
+
+        <li class="list-group-item">
+          Дата публикации: {{ post.pub_date|date:"d E Y" }}
+        </li>
+
+        <!-- если у поста есть группа -->
+        <li class="list-group-item">
+          Группа: {{ post.group.get_full_name }}
+          {% if post.group %}
+            <a href="{% url 'posts:group_list' post.group.slug %}">
+              все записи группы
+            </a>
+          {% endif %}
+        </li>
+
+        <li class="list-group-item">
+          Автор: {{ post.author.get_full_name }}
+        </li>
+
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          Всего постов автора: <span> {{ post.author.posts.count }} </span>
+        </li>
+
+        <li class="list-group-item">
+          {% if post.author.username is not None %}
+            <a href="{% url 'posts:profile' post.author.username %}">
+              все посты пользователя
+            </a>
+          {% endif %}
+        </li>
+
+      </ul>
+    </aside>
+
+    <article class="col-12 col-md-9">
+      <p>
+        {{ post.text }}
+      </p>
+    </article>
+
+    {% if post.author.username == user.username %}
+      <form action="{% url 'posts:is_edit' post.pk %}">
+        <button type="submit" class="btn btn-primary">
+          редактировать запись
+        </button>
+      </form>
+    {% endif %}
+
+  </div>
+
+{% endblock %}
+
+{% include 'includes/footer.html' %}

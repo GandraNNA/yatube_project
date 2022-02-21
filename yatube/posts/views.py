@@ -5,7 +5,7 @@ from .models import Post, Group
 
 # Main page
 def index(request):
-    title = 'Главная страница'
+    title = 'Последние обновления на сайте'
     text = 'Последние обновления на сайте'
     # Одна строка вместо тысячи слов на SQL:
     # в переменную posts будет сохранена выборка из 10 объектов модели Post,
@@ -23,6 +23,7 @@ def index(request):
 # View-функция для страницы сообщества:
 def group_posts(request, slug):
     template = 'posts/group_list.html'
+    title = 'Записи сообщества ' + slug
     text = 'Лев Толстой – зеркало русской революции.'
     # Функция get_object_or_404 получает по заданным критериям объект
     # из базы данных или возвращает сообщение об ошибке, если объект не найден.
@@ -36,6 +37,7 @@ def group_posts(request, slug):
     context = {
         'group': group,
         'posts': posts,
+        'title': title,
         'text': text,
     }
     return render(request, template, context)
