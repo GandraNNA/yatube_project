@@ -6,7 +6,7 @@ User = get_user_model()
 
 class Group(models.Model):
     title = models.CharField(
-        'Заголовок',
+        'Название группы',
         max_length=200
     )
     slug = models.SlugField(
@@ -21,7 +21,10 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField('Текст поста')
+    text = models.TextField(
+        'Текст поста',
+        help_text='Введите текст поста'
+    )
     pub_date = models.DateTimeField(
         'Дата публикации',
         auto_now_add=True
@@ -37,7 +40,9 @@ class Post(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='order_group_posts'
+        related_name='order_group_posts',
+        verbose_name='Группа',
+        help_text='Группа, к которой будет относиться пост'
     )
 
     class Meta:

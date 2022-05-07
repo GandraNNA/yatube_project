@@ -27,12 +27,12 @@ urlpatterns = [
     ),
     path(
         'create/',
-        views.post_create,
-        name='post_create'
+        views.create_post,
+        name='create_post'
     ),
     path(
         'posts/<int:post_id>/edit/',
         views.post_edit,
-        name='is_edit'
+        name='post_edit'
     ),
 ]

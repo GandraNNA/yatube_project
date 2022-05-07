@@ -47,7 +47,7 @@
     </article>
 
     {% if post.author.username == user.username %}
-      <form action="{% url 'posts:is_edit' post.pk %}">
+      <form action="{% url 'posts:post_edit' post.pk %}">
         <button type="submit" class="btn btn-primary">
           редактировать запись
         </button>

@@ -84,8 +84,8 @@ def post_detail(request, post_id):
 
 
 @login_required
-def post_create(request):
-    template = 'posts/create.html'
+def create_post(request):
+    template = 'posts/create_post.html'
     title = 'Новая запись'
     header = 'Добавить запись'
     form = PostForm(data=request.POST)
@@ -123,7 +123,7 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
-    template = 'posts/create.html',
+    template = 'posts/create_post.html',
     title = 'Редактировать запись'
     header = 'Редактировать запись'
     post = get_object_or_404(
@@ -159,7 +159,7 @@ def post_edit(request, post_id):
     context = {
         'title': title,
         'header': header,
-        'is_edit': True,
+        'post_edit': True,
         'form': form,
     }
     return render(
