@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sorl.thumbnail',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,5 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
