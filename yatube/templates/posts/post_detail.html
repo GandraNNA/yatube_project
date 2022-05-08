@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load thumbnail %}
 {% include 'includes/header.html' %}
 
 {% block content %}
@@ -41,6 +42,9 @@
     </aside>
 
     <article class="col-12 col-md-9">
+      {% thumbnail post.image "100x100" crop="center" as im %}
+        <img src="/media/{{ post.image }}" width="960" height="399" alt="">
+      {% endthumbnail %}
       <p>
         {{ post.text }}
       </p>

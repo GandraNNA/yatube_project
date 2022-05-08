@@ -2,6 +2,9 @@
 
 {% include 'includes/header.html' %}
 
+{% load thumbnail %}
+{% load static %}
+
 {% block content %}
 
   <h1>{{ text }}</h1>
@@ -16,11 +19,14 @@
           все посты пользователя
         </a>
       </li>
+
       <li>
         Дата публикации: {{ post.pub_date|date:"d E Y" }}
       </li>
     </ul>
-
+    {% thumbnail post.image "100x100" crop="center" as im %}
+      <img src="/media/{{ post.image }}" width="960" height="399" alt="">
+    {% endthumbnail %}
     <p>{{ post.text }}</p>
 
     <a class="navbar-brand"

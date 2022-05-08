@@ -8,7 +8,8 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = (
             'text',
-            'group'
+            'group',
+            'image'
         )
 
     text = forms.Textarea()
