@@ -1,10 +1,12 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
+from ..forms import PostForm
 from ..models import Post, Group
 
 User = get_user_model()
@@ -23,6 +25,21 @@ class PagesTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.post_author,
             text='Тестовый пост',
+            image='small.gif'
+        )
+        cls.form = PostForm()
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
         )
 
     def setUp(self):
@@ -69,6 +86,8 @@ class PagesTests(TestCase):
         self.assertTemplateUsed(response, 'posts/create_post.html')
 
     def test_home_page_show_correct_context(self):
+         # TODO: Добавить проверку передачи image через context поста
+         # на главную страницу.
         response = self.authorized_client.get(reverse('posts:index'))
         first_object = response.context['page_obj'][0]
         task_author_0 = first_object.author
@@ -76,23 +95,31 @@ class PagesTests(TestCase):
         self.assertEqual(task_author_0.username, 'author')
         self.assertEqual(task_text_0, 'Тестовый пост')
 
+        # context = response.context['post'].image
+        # print(context)
+        # self.assertEqual(context, 'posts/small.gif')
+
     def test_group_posts_page_show_correct_context(self):
+        """ Добавить проверку картинки на странице группы """
         response = self.authorized_client.get(reverse(
             'posts:group_list', kwargs={'slug': 'test_slug'}))
         task_group = response.context['group']
         self.assertEqual(task_group.title, 'Тестовая группа')
 
     def test_profile_show_correct_context(self):
+        """ TODO: Добавить проверку картинки на страницу профиля """
         response = self.authorized_client.get(reverse(
             'posts:profile', kwargs={'username': f'{self.user}'}))
         author = response.context['author']
         task_title = response.context['title']
         self.assertEqual(task_title, 'Профайл пользователя ')
         self.assertEqual(author.username, self.user.username)
+        # self.assertTrue(Post.objects.filter(image='posts/'))
         number_of_posts = response.context['number_of_posts']
         self.assertEqual(number_of_posts, 1)
 
     def test_post_detail_show_correct_context(self):
+        """ TODO: Добавить проверку картинки на отдельной странице поста """
         response = self.authorized_client.get(
             reverse('posts:post_detail',
                     kwargs={'post_id': f'{self.post.id}'}
@@ -114,6 +141,7 @@ class PagesTests(TestCase):
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
+            'image': forms.fields.ImageField,
         }
         get_form = response.context['form']
         self.assertIsNotNone(get_form)
@@ -131,6 +159,7 @@ class PagesTests(TestCase):
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
+            'image': forms.fields.ImageField,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
