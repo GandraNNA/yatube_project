@@ -124,6 +124,9 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
+NUMBER_OF_POSTS_ON_PAGE = 10
+EMPTY_VALUE_DISPLAY = '-пусто-'
+
 CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
 MEDIA_URL = '/media/'

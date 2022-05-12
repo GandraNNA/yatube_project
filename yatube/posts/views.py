@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -13,7 +14,7 @@ def index(request):
     title = 'Последние обновления на сайте'
     text = 'Последние обновления на сайте'
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, settings.NUMBER_OF_POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -32,7 +33,7 @@ def group_posts(request, slug):
     template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
     post_list = group.order_group_posts.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, settings.NUMBER_OF_POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -50,18 +51,14 @@ def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
     title = 'Профайл пользователя ' + author.get_full_name()
-    post_user_list = Post.objects.select_related('author',
-                                                 'group').all()
-    number_of_posts = post_user_list.count()
     post_list = author.posts.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, settings.NUMBER_OF_POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
         'page_obj': page_obj,
         'title': title,
         'author': author,
-        'number_of_posts': number_of_posts,
         'post_list': post_list,
     }
     return render(request,

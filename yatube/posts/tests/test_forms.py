@@ -6,13 +6,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from .. import models
 from ..forms import PostForm
 from ..models import Group, Post
 
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
@@ -23,7 +23,9 @@ class TaskCreateFormTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         # Создаём тестовую запись в БД
-        cls.post_author = User.objects.create_user(username='author')
+        cls.User = models.User
+        cls.post_author = cls.User.objects.create_user(
+            username='author')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test_slug',
@@ -86,8 +88,11 @@ class TaskCreateFormTests(TestCase):
                 image='posts/small.gif'
             ).exists()
         )
+        self.assertEqual(Post.objects.latest('id').text,
+                         form_data['text'])
 
     def test_edit_post(self):
+        post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый пост',
             'group': self.group.id
@@ -108,4 +113,5 @@ class TaskCreateFormTests(TestCase):
                 group=self.group.id
             ).exists()
         )
+        self.assertEqual(Post.objects.count(), post_count)
         self.assertEqual(response.status_code, HTTPStatus.OK)
