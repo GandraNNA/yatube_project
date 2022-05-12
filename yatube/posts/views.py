@@ -50,7 +50,8 @@ def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
     title = 'Профайл пользователя ' + author.get_full_name()
-    post_user_list = Post.objects.select_related('author', 'group').all()
+    post_user_list = Post.objects.select_related('author',
+                                                 'group').all()
     number_of_posts = post_user_list.count()
     post_list = author.posts.all()
     paginator = Paginator(post_list, 10)
@@ -88,7 +89,8 @@ def create_post(request):
     template = 'posts/create_post.html'
     title = 'Новая запись'
     header = 'Добавить запись'
-    form = PostForm(data=request.POST)
+    form = PostForm(data=request.POST or None,
+                    files=request.FILES or None)
     id_group = Group.objects.all()
     if request.method == 'POST':
 
