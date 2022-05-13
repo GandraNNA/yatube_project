@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 # from django.core.mail import send_mail
 from django.urls import reverse_lazy
 
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 from .models import Group, Post, User
 
 
@@ -71,8 +71,12 @@ def post_detail(request, post_id):
     template = 'posts/post_detail.html'
     post = Post.objects.filter(pk=post_id).first()
     title = 'Пост ' + post.text[:15]
+    form = CommentForm(request.POST or None)
+    comments = post.comments.all()
     context = {
         'post': post,
+        'form': form,
+        'comments': comments,
         'title': title,
     }
     return render(request,
@@ -167,3 +171,15 @@ def post_edit(request, post_id):
         template,
         context
     )
+
+
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    form = CommentForm(request.POST or None)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.author = request.user
+        comment.post = post
+        comment.save()
+    return redirect('posts:post_detail', post.pk)
