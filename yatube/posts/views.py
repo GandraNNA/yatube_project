@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 # from django.core.mail import send_mail
 from django.urls import reverse_lazy
+from django.views.decorators.cache import cache_page
 
 from .forms import PostForm, CommentForm
 from .models import Group, Post, User
 
 
+@cache_page(20)
 def index(request):
     template = 'posts/index.html'
     title = 'Последние обновления на сайте'
@@ -29,6 +31,7 @@ def index(request):
     )
 
 
+@cache_page(20)
 def group_posts(request, slug):
     template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
@@ -47,6 +50,7 @@ def group_posts(request, slug):
     )
 
 
+@cache_page(20)
 def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
@@ -67,6 +71,7 @@ def profile(request, username):
                   )
 
 
+@cache_page(20)
 def post_detail(request, post_id):
     template = 'posts/post_detail.html'
     post = Post.objects.filter(pk=post_id).first()
@@ -85,6 +90,7 @@ def post_detail(request, post_id):
                   )
 
 
+@cache_page(20)
 @login_required
 def create_post(request):
     template = 'posts/create_post.html'
@@ -124,6 +130,7 @@ def create_post(request):
     )
 
 
+@cache_page(20)
 @login_required
 def post_edit(request, post_id):
     template = 'posts/create_post.html',
@@ -173,6 +180,7 @@ def post_edit(request, post_id):
     )
 
 
+@cache_page(20)
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
