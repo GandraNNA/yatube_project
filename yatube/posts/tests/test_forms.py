@@ -3,12 +3,11 @@ import tempfile
 from http import HTTPStatus
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from .. import models
 from ..forms import PostForm
-from ..models import Group, Post
+from ..models import Group, Post, Comment
 
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -34,6 +33,11 @@ class TaskCreateFormTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.post_author,
             text='Тестовый пост',
+        )
+        cls.comment = Comment.objects.create(
+            text='Тестовый комментарий',
+            author=cls.post_author,
+            post=cls.post
         )
         cls.form = PostForm()
 
@@ -115,3 +119,18 @@ class TaskCreateFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), post_count)
         self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    # def test_comments(self):
+    #     # TODO: комментировать посты может только авторизованный пользователь;
+    #     # TODO: после успешной отправки комментарий появляется на странице поста.
+    #     comment_count = Comment.objects.count()
+    #     form_data = {
+    #         'text': 'Тестовый комментарий',
+    #     }
+    #     self.authorized_client.get(
+    #         reverse('posts:add_comment',
+    #                 kwargs={'post_id': f'{self.post.id}'}),
+    #         data=form_data,
+    #         follow=True,
+    #     )
+    #     self.assertEqual(Comment.objects.count(), comment_count + 1)

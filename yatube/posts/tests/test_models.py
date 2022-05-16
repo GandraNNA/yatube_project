@@ -18,7 +18,7 @@ class PostModelTest(TestCase):
         )
         cls.post = Post.objects.create(
             author=cls.user,
-            text='Тестовая пост',
+            text='Тестовый пост',
         )
 
     def test_models_have_correct_object_names(self):
@@ -26,8 +26,8 @@ class PostModelTest(TestCase):
         expected_group_name = group.title
         self.assertEqual(expected_group_name, str(group))
         post = PostModelTest.post
-        expected_post_text = post.text[:15]
-        self.assertEqual(expected_post_text, str(post))
+        expected_post_text = self.post.text
+        self.assertEqual(expected_post_text, str(post.text))
 
     def test_verbose_name(self):
         post = PostModelTest.post

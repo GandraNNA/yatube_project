@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -8,7 +9,7 @@ from django import forms
 
 from .. import models
 from ..forms import PostForm
-from ..models import Post, Group, User
+from ..models import Post, Group, User, Comment
 
 INDEX_URL = reverse('posts:index')
 CREATE_POST_URL = reverse('posts:create_post')
@@ -48,6 +49,7 @@ class PagesTests(TestCase):
             content=cls.small_gif,
             content_type='image/gif'
         )
+        cls.clear = cache.clear()
 
     def setUp(self):
         self.guest_client = Client()
@@ -71,7 +73,6 @@ class PagesTests(TestCase):
                     'post_id': f'{self.post.id}'}
             ),
             'posts/create_post.html': CREATE_POST_URL,
-
         }
         for template, reverse_name in templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
@@ -93,10 +94,12 @@ class PagesTests(TestCase):
         # на главную страницу.
         response = self.authorized_client.get(INDEX_URL)
         first_object = response.context['page_obj'][0]
+        image_in_context = response.context['image']
         task_author_0 = first_object.author
         task_text_0 = first_object.text
         self.assertEqual(task_author_0.username, 'author')
         self.assertEqual(task_text_0, 'Тестовый пост')
+        self.assertTrue(image_in_context)
 
         # context = response.context['post'].image
         # print(context)
@@ -106,7 +109,9 @@ class PagesTests(TestCase):
         """ Добавить проверку картинки на странице группы """
         response = self.authorized_client.get(GROUP_LIST_URL)
         task_group = response.context['group']
+        image_in_context = response.context['image']
         self.assertEqual(task_group.title, 'Тестовая группа')
+        self.assertTrue(image_in_context)
 
     def test_profile_show_correct_context(self):
         """ TODO: Добавить проверку картинки на страницу профиля """
@@ -114,22 +119,25 @@ class PagesTests(TestCase):
             'posts:profile', kwargs={'username': f'{self.user}'}))
         author = response.context['author']
         task_title = response.context['title']
+        image_in_context = response.context['image']
         self.assertEqual(task_title, 'Профайл пользователя ')
         self.assertEqual(author.username, self.user.username)
+        self.assertTrue(image_in_context)
         # self.assertTrue(Post.objects.filter(image='posts/'))
 
     def test_post_detail_show_correct_context(self):
-        """ TODO: Добавить проверку картинки на отдельной странице поста """
         response = self.authorized_client.get(
             reverse('posts:post_detail',
                     kwargs={'post_id': f'{self.post.id}'}
                     )
         )
         first_object = response.context['post']
+        image_in_context = response.context['image']
         task_author_0 = first_object.author
         task_text_0 = first_object.text
         self.assertEqual(task_author_0.username, 'author')
         self.assertEqual(task_text_0, 'Тестовый пост')
+        self.assertTrue(image_in_context)
 
     def test_edit_post_show_correct_context(self):
         response = self.authorized_author.get(reverse(
@@ -164,6 +172,8 @@ class PagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = get_form.fields[value]
                 self.assertIsInstance(form_field, expected)
+
+    # TODO: проверить работу кэша
 
 
 class PaginatorViewsTest(TestCase):
