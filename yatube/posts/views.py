@@ -10,11 +10,16 @@ from .forms import PostForm, CommentForm
 from .models import Group, Post, User
 
 
-@cache_page(20)
+# TODO: переписать кеширование главной страницы
+# Список постов на главной странице сайта хранится в кэше и
+# обновляется раз в 20 секунд.
+
+# @cache_page(20)
 def index(request):
     template = 'posts/index.html'
     title = 'Последние обновления на сайте'
     text = 'Последние обновления на сайте'
+    image = Post.image
     post_list = Post.objects.all()
     paginator = Paginator(post_list, settings.NUMBER_OF_POSTS_ON_PAGE)
     page_number = request.GET.get('page')
@@ -23,6 +28,7 @@ def index(request):
         'page_obj': page_obj,
         'title': title,
         'text': text,
+        'image': image,
     }
     return render(
         request,
@@ -31,7 +37,6 @@ def index(request):
     )
 
 
-@cache_page(20)
 def group_posts(request, slug):
     template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
@@ -39,9 +44,11 @@ def group_posts(request, slug):
     paginator = Paginator(post_list, settings.NUMBER_OF_POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    image = Post.image
     context = {
         'group': group,
         'page_obj': page_obj,
+        'image': image,
     }
     return render(
         request,
@@ -50,7 +57,6 @@ def group_posts(request, slug):
     )
 
 
-@cache_page(20)
 def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
@@ -59,11 +65,13 @@ def profile(request, username):
     paginator = Paginator(post_list, settings.NUMBER_OF_POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    image = Post.image
     context = {
         'page_obj': page_obj,
         'title': title,
         'author': author,
         'post_list': post_list,
+        'image': image,
     }
     return render(request,
                   template,
@@ -71,18 +79,19 @@ def profile(request, username):
                   )
 
 
-@cache_page(20)
 def post_detail(request, post_id):
     template = 'posts/post_detail.html'
     post = Post.objects.filter(pk=post_id).first()
     title = 'Пост ' + post.text[:15]
     form = CommentForm(request.POST or None)
     comments = post.comments.all()
+    image = Post.image
     context = {
         'post': post,
         'form': form,
         'comments': comments,
         'title': title,
+        'image': image,
     }
     return render(request,
                   template,
@@ -90,7 +99,6 @@ def post_detail(request, post_id):
                   )
 
 
-@cache_page(20)
 @login_required
 def create_post(request):
     template = 'posts/create_post.html'
@@ -130,7 +138,6 @@ def create_post(request):
     )
 
 
-@cache_page(20)
 @login_required
 def post_edit(request, post_id):
     template = 'posts/create_post.html',
@@ -180,11 +187,11 @@ def post_edit(request, post_id):
     )
 
 
-@cache_page(20)
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(request.POST or None)
+
     if form.is_valid():
         comment = form.save(commit=False)
         comment.author = request.user
