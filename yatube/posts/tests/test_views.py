@@ -90,8 +90,7 @@ class PagesTests(TestCase):
         self.assertTemplateUsed(response, 'posts/create_post.html')
 
     def test_home_page_show_correct_context(self):
-        # TODO: Добавить проверку передачи image через context поста
-        # на главную страницу.
+        # Проверка передачи image через context поста на главную страницу.
         response = self.authorized_client.get(INDEX_URL)
         first_object = response.context['page_obj'][0]
         image_in_context = response.context['image']
@@ -101,12 +100,8 @@ class PagesTests(TestCase):
         self.assertEqual(task_text_0, 'Тестовый пост')
         self.assertTrue(image_in_context)
 
-        # context = response.context['post'].image
-        # print(context)
-        # self.assertEqual(context, 'posts/small.gif')
-
     def test_group_posts_page_show_correct_context(self):
-        """ Добавить проверку картинки на странице группы """
+        """ Проверка картинки на странице группы """
         response = self.authorized_client.get(GROUP_LIST_URL)
         task_group = response.context['group']
         image_in_context = response.context['image']
@@ -114,7 +109,7 @@ class PagesTests(TestCase):
         self.assertTrue(image_in_context)
 
     def test_profile_show_correct_context(self):
-        """ TODO: Добавить проверку картинки на страницу профиля """
+        """ Проверка картинки на странице профиля """
         response = self.authorized_client.get(reverse(
             'posts:profile', kwargs={'username': f'{self.user}'}))
         author = response.context['author']
@@ -123,9 +118,9 @@ class PagesTests(TestCase):
         self.assertEqual(task_title, 'Профайл пользователя ')
         self.assertEqual(author.username, self.user.username)
         self.assertTrue(image_in_context)
-        # self.assertTrue(Post.objects.filter(image='posts/'))
 
     def test_post_detail_show_correct_context(self):
+        # Проверка картинки на отдельной странице поста
         response = self.authorized_client.get(
             reverse('posts:post_detail',
                     kwargs={'post_id': f'{self.post.id}'}
@@ -159,6 +154,7 @@ class PagesTests(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_create_post_show_correct_context(self):
+        # Проверка записи в БД при отправке картинки через форму
         response = self.authorized_client.get(CREATE_POST_URL)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         get_form = response.context['form']
