@@ -29,7 +29,8 @@ class Post(models.Model):
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
-        auto_now_add=True
+        auto_now_add=True,
+        db_index=True
     )
     author = models.ForeignKey(
         User,
@@ -53,6 +54,15 @@ class Post(models.Model):
     )
 
 
+class Meta:
+    ordering = ('pub_date',)
+    verbose_name = 'Пост'
+    verbose_name_plural = 'Посты'
+
+    def __str__(self):
+        return self.text
+
+
 class Comment(CreatedModel):
     post = models.ForeignKey(
         Post,
@@ -71,13 +81,3 @@ class Comment(CreatedModel):
 
     def __str__(self):
         return self.text
-
-
-class Meta:
-    ordering = ('pub_date',)
-    verbose_name = 'Пост'
-    verbose_name_plural = 'Посты'
-
-
-def __str__(self):
-    return self.text
