@@ -17,6 +17,7 @@ class PostForm(forms.ModelForm):
             queryset=Group.objects.all(),
             required=False
         )
+        image = forms.ImageField()
 
 
 class CommentForm(forms.ModelForm):
