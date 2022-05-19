@@ -4,11 +4,12 @@
 
 {% load thumbnail %}
 {% load static %}
+{% load cache %}
 
 {% block content %}
-
+  {% cache 20 index_page with page_obj %}
   <h1>{{ text }}</h1>
-
+{#  {% include 'includes/switcher.html' %}#}
   {% for post in page_obj %}
 
     <ul>
@@ -47,6 +48,8 @@
   {% endfor %}
 
   {% include 'includes/paginator.html' %}
+
+  {% endcache %}
 
 {% endblock %}
 

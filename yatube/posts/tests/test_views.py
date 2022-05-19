@@ -49,7 +49,7 @@ class PagesTests(TestCase):
             content=cls.small_gif,
             content_type='image/gif'
         )
-        cls.clear = cache.clear()
+        cache.clear()
 
     def setUp(self):
         self.guest_client = Client()
