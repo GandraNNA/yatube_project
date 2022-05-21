@@ -9,7 +9,7 @@ from django import forms
 
 from .. import models
 from ..forms import PostForm
-from ..models import Post, Group, User, Comment
+from ..models import Post, Group, User
 
 INDEX_URL = reverse('posts:index')
 CREATE_POST_URL = reverse('posts:create_post')
@@ -90,7 +90,7 @@ class PagesTests(TestCase):
         self.assertTemplateUsed(response, 'posts/create_post.html')
 
     def test_home_page_show_correct_context(self):
-        # Проверка передачи image через context поста на главную страницу.
+        # Проверка контекста на главной странице
         response = self.authorized_client.get(INDEX_URL)
         first_object = response.context['page_obj'][0]
         image_in_context = response.context['image']
@@ -101,7 +101,7 @@ class PagesTests(TestCase):
         self.assertTrue(image_in_context)
 
     def test_group_posts_page_show_correct_context(self):
-        """ Проверка картинки на странице группы """
+        # Проверка картинки на странице группы
         response = self.authorized_client.get(GROUP_LIST_URL)
         task_group = response.context['group']
         image_in_context = response.context['image']
@@ -109,7 +109,7 @@ class PagesTests(TestCase):
         self.assertTrue(image_in_context)
 
     def test_profile_show_correct_context(self):
-        """ Проверка картинки на странице профиля """
+        # Проверка картинки на странице профиля
         response = self.authorized_client.get(reverse(
             'posts:profile', kwargs={'username': f'{self.user}'}))
         author = response.context['author']
@@ -154,7 +154,8 @@ class PagesTests(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_create_post_show_correct_context(self):
-        # Проверка записи в БД при отправке картинки через форму
+        # Проверка контекста и записи в БД при отправке картинки
+        # через форму
         response = self.authorized_client.get(CREATE_POST_URL)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         get_form = response.context['form']
@@ -169,7 +170,19 @@ class PagesTests(TestCase):
                 form_field = get_form.fields[value]
                 self.assertIsInstance(form_field, expected)
 
-    # TODO: проверить работу кэша
+    def test_cash(self):
+        # Проверка кэша на главной странице
+        response = self.authorized_client.get(reverse('posts:index'))
+        Post.objects.get(pk=self.post.pk).delete()
+        second_response = self.authorized_client.get(
+            reverse('posts:index'))
+        self.assertEqual(response.content, second_response.content)
+
+    # TODO: Авторизованный пользователь может подписываться на других
+    #  пользователей и удалять их из подписок.
+
+    # TODO: Новая запись пользователя появляется в ленте тех, кто на
+    #  него подписан и не появляется в ленте тех, кто не подписан.
 
 
 class PaginatorViewsTest(TestCase):
