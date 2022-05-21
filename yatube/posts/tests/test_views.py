@@ -9,7 +9,7 @@ from django import forms
 
 from .. import models
 from ..forms import PostForm
-from ..models import Post, Group, User
+from ..models import Post, Group, User, Follow
 
 INDEX_URL = reverse('posts:index')
 CREATE_POST_URL = reverse('posts:create_post')
@@ -53,9 +53,11 @@ class PagesTests(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
-        self.user = User.objects.create_user(username='HasNoName')
+        self.user = User.objects.create_user(username='Anna')
+        self.second_user = User.objects.create_user(username='Alex')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        # self.authorized_client.force_login(self.second_user)
         self.authorized_author = Client()
         self.authorized_author.force_login(self.post_author)
 
@@ -178,11 +180,63 @@ class PagesTests(TestCase):
             reverse('posts:index'))
         self.assertEqual(response.content, second_response.content)
 
-    # TODO: Авторизованный пользователь может подписываться на других
-    #  пользователей и удалять их из подписок.
 
-    # TODO: Новая запись пользователя появляется в ленте тех, кто на
-    #  него подписан и не появляется в ленте тех, кто не подписан.
+class TestFollow(TestCase):
+
+    def setUp(self) -> None:
+        self.follower_client = Client()
+        self.following_client = Client()
+        self.follower = User.objects.create_user(username='follower')
+        self.following = User.objects.create_user(
+            username='following')
+        self.follower_client.force_login(self.follower)
+        self.following_client.force_login(self.following)
+        self.post = Post.objects.create(
+            author=self.following,
+            text='Тестовый пост',
+        )
+
+    def test_new_post_in_followers_feed(self):
+        # Новая запись пользователя появляется в ленте тех, кто на
+        # него подписан и не появляется в ленте тех, кто не подписан
+        self.follower_client.force_login(self.follower)
+        self.follower_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': f'{self.following}'})
+        )
+        self.assertTrue(Follow.objects.filter(
+            user=self.follower,
+            author=self.following).exists()
+                        )
+
+        Follow.objects.create(user=self.follower,
+                              author=self.following)
+        response = self.follower_client.get('/follow/')
+        post_text = response.context['page_obj'][0].text
+        self.assertEqual(post_text, 'Тестовый пост')
+
+        response = self.following_client.get('/follow/')
+        self.assertNotContains(response, 'Тестовый пост')
+
+    def test_follow_and_unfollow(self):
+        # Авторизованный пользователь может подписываться на других
+        #  пользователей и удалять их из подписок.
+        follows_count = Follow.objects.count()
+
+        self.follower_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': f'{self.following.username}'})
+        )
+        self.assertEqual(
+            Follow.objects.all().count(),
+            follows_count + 1
+        )
+
+        self.follower_client.get(reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': f'{self.following.username}'})
+        )
+        self.assertEqual(Follow.objects.all().count(), follows_count)
 
 
 class PaginatorViewsTest(TestCase):
