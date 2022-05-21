@@ -4,17 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 # from django.core.mail import send_mail
 from django.urls import reverse_lazy
-from django.views.decorators.cache import cache_page
 
 from .forms import PostForm, CommentForm
-from .models import Group, Post, User
+from .models import Group, Post, User, Follow
 
 
-# TODO: переписать кеширование главной страницы
-# Список постов на главной странице сайта хранится в кэше и
-# обновляется раз в 20 секунд.
-
-# @cache_page(20)
 def index(request):
     template = 'posts/index.html'
     title = 'Последние обновления на сайте'
@@ -66,12 +60,19 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     image = Post.image
+    current_user = request.user
+    if current_user.is_authenticated and current_user != author:
+        following = Follow.objects.filter(
+            user=current_user, author=author).exists()
+    else:
+        following = False
     context = {
         'page_obj': page_obj,
         'title': title,
         'author': author,
         'post_list': post_list,
         'image': image,
+        'following': following,
     }
     return render(request,
                   template,
@@ -198,3 +199,44 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
     return redirect('posts:post_detail', post.pk)
+
+
+@login_required
+def follow_index(request):
+    template = 'posts/follow.html'
+    current_user = request.user
+    title = 'Подписки'
+    text = 'Посты по подпискам'
+    post_list = Post.objects.filter(
+        author__following__user=current_user)
+    paginator = Paginator(post_list, settings.NUMBER_OF_POSTS_ON_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {
+        'page_obj': page_obj,
+        'title': title,
+        'text': text,
+    }
+    return render(request, template, context)
+
+
+@login_required
+def profile_follow(request, username):
+    # Подписаться на автора
+    author = get_object_or_404(User, username=username)
+    if request.user != author:
+        Follow.objects.get_or_create(
+            user=request.user, author=author
+        )
+    return redirect('posts:profile', username)
+
+
+@login_required
+def profile_unfollow(request, username):
+    # Дизлайк, отписка
+    author = get_object_or_404(User, username=username)
+    if request.user != author:
+        Follow.objects.filter(
+            user=request.user, author=author
+        ).delete()
+    return redirect('posts:profile', username=author.username)
