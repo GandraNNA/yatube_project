@@ -23,7 +23,7 @@
       >
         Подписаться
       </a>
-   {% endif %}
+  {% endif %}
 
   {% for post in page_obj %}
 
@@ -51,14 +51,13 @@
         подробная информация
       </a>
 
-    </article>
-
     {% if post.group %}
       <a class="navbar-brand"
          href="{% url 'Posts:group_list' post.group.slug %}">
         все записи группы
       </a>
     {% endif %}
+    </article>
     {% if not forloop.last %}
       <hr>{% endif %}
 
