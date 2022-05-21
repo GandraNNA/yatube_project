@@ -120,17 +120,34 @@ class TaskCreateFormTests(TestCase):
         self.assertEqual(Post.objects.count(), post_count)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    # def test_comments(self):
-    #     # TODO: комментировать посты может только авторизованный пользователь;
-    #     # TODO: после успешной отправки комментарий появляется на странице поста.
-    #     comment_count = Comment.objects.count()
-    #     form_data = {
-    #         'text': 'Тестовый комментарий',
-    #     }
-    #     self.authorized_client.get(
-    #         reverse('posts:add_comment',
-    #                 kwargs={'post_id': f'{self.post.id}'}),
-    #         data=form_data,
-    #         follow=True,
-    #     )
-    #     self.assertEqual(Comment.objects.count(), comment_count + 1)
+    def test_comment_by_authorized_user(self):
+        # Комментировать может только авторизованный пользователь
+        response = self.client.get(
+            reverse('posts:add_comment',
+                    kwargs={'post_id': self.post.id})
+        )
+        self.assertRedirects(
+            response,
+            reverse('users:login') + '?next=' + reverse(
+                'posts:add_comment',
+                kwargs={'post_id': self.post.id})
+        )
+
+    def test_add_comments(self):
+        # После успешной отправки комментарий появляется на странице
+        # поста.
+        comment_count = Comment.objects.count()
+        form_data = {
+            'text': 'Тестовый комментарий',
+        }
+        response = self.authorized_client.post(
+            reverse('posts:add_comment',
+                    kwargs={'post_id': f'{self.post.id}'}),
+            data=form_data,
+            follow=True,
+        )
+        self.assertEqual(
+            Comment.objects.count(),
+            comment_count + 1
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
