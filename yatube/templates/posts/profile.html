@@ -11,24 +11,24 @@
 
   {% if following %}
     <a
-      class="btn btn-lg btn-light"
-      href="{% url 'posts:profile_unfollow' author.username %}" role="button"
+        class="btn btn-lg btn-light"
+        href="{% url 'posts:profile_unfollow' author.username %}"
+        role="button"
     >
       Отписаться
     </a>
   {% else %}
-      <a
+    <a
         class="btn btn-lg btn-primary"
-        href="{% url 'posts:profile_follow' author.username %}" role="button"
-      >
-        Подписаться
-      </a>
+        href="{% url 'posts:profile_follow' author.username %}"
+        role="button"
+    >
+      Подписаться
+    </a>
   {% endif %}
 
   {% for post in page_obj %}
-
     <article>
-
       <ul>
         <li>
           Автор: {{ author.username }}
@@ -41,26 +41,27 @@
           Дата публикации: {{ post.pub_date|date:"d E Y" }}
         </li>
       </ul>
+
       {% thumbnail post.image "100x100" crop="center" as im %}
-        <img src="/media/{{ post.image }}" width="960" height="399" alt="">
+        <img src="/media/{{ post.image }}" width="960" height="399"
+             alt="">
       {% endthumbnail %}
-      <p> {{ post.text }} </p>
+      <p> {{ post.text|linebreaksbr }} </p>
 
       <a class="navbar-brand"
          href="{% url 'Posts:post_detail' post.pk %}">
         подробная информация
       </a>
 
-    {% if post.group %}
-      <a class="navbar-brand"
-         href="{% url 'Posts:group_list' post.group.slug %}">
-        все записи группы
-      </a>
-    {% endif %}
+      {% if post.group %}
+        <a class="navbar-brand"
+           href="{% url 'Posts:group_list' post.group.slug %}">
+          все записи группы
+        </a>
+      {% endif %}
     </article>
     {% if not forloop.last %}
       <hr>{% endif %}
-
   {% endfor %}
 
   {% include 'includes/paginator.html' %}

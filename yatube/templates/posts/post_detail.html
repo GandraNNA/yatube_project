@@ -45,9 +45,7 @@
       {% thumbnail post.image "100x100" crop="center" as im %}
         <img src="/media/{{ post.image }}" width="960" height="399" alt="">
       {% endthumbnail %}
-      <p>
-        {{ post.text }}
-      </p>
+      <p> {{ post.text|linebreaksbr }} </p>
     </article>
 
     {% if post.author.username == user.username %}

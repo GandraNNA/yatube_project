@@ -8,46 +8,44 @@
 
 {% block content %}
   {% cache 20 index_page with page_obj %}
-  <h1>{{ text }}</h1>
-  {% include 'includes/switcher.html' %}
-  {% for post in page_obj %}
+    <h1>{{ text }}</h1>
+    {% include 'includes/switcher.html' %}
 
-    <ul>
-      <li>
-        Автор: {{ post.author.get_full_name }}
-        <a
-            href="{% url 'Posts:profile' post.author.username %}">
-          все посты пользователя
-        </a>
-      </li>
+    {% for post in page_obj %}
+      <ul>
+        <li>
+          Автор: {{ post.author.get_full_name }}
+          <a
+              href="{% url 'Posts:profile' post.author.username %}">
+            все посты пользователя
+          </a>
+        </li>
+        <li> Дата публикации: {{ post.pub_date|date:"d E Y" }} </li>
+      </ul>
 
-      <li>
-        Дата публикации: {{ post.pub_date|date:"d E Y" }}
-      </li>
-    </ul>
-    {% thumbnail post.image "100x100" crop="center" as im %}
-      <img src="/media/{{ post.image }}" width="960" height="399" alt="">
-    {% endthumbnail %}
-    <p>{{ post.text }}</p>
+      {% thumbnail post.image "100x100" crop="center" as im %}
+        <img src="/media/{{ post.image }}" width="960" height="399"
+             alt="">
+      {% endthumbnail %}
+      <p>{{ post.text|linebreaksbr }}</p>
 
-    <a class="navbar-brand"
-       href="{% url 'Posts:post_detail' post.pk %}">
-      подробная информация
-    </a>
-
-    {% if post.group %}
       <a class="navbar-brand"
-         href="{% url 'Posts:group_list' post.group.slug %}">
-        всё записи группы
+         href="{% url 'Posts:post_detail' post.pk %}">
+        подробная информация
       </a>
-    {% endif %}
 
-    {% if not forloop.last %}
-      <hr>{% endif %}
+      {% if post.group %}
+        <a class="navbar-brand"
+           href="{% url 'Posts:group_list' post.group.slug %}">
+          всё записи группы
+        </a>
+      {% endif %}
 
-  {% endfor %}
+      {% if not forloop.last %} <hr> {% endif %}
 
-  {% include 'includes/paginator.html' %}
+    {% endfor %}
+
+    {% include 'includes/paginator.html' %}
 
   {% endcache %}
 
