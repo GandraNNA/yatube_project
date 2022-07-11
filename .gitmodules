@@ -1,0 +1,3 @@
+[submodule "api_yatube"]
+	path = api_yatube
+	url = https://github.com/GandraNNA/api_yatube.git
